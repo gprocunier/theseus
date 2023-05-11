@@ -90,7 +90,7 @@
           user_domain_name: "{{ openstack_user_domain_name }}"
           project_domain_name: "{{ openstack_project_domain_name }}"
       loop: "{{ vm_volumes[1:] }}"
-  loop: "{{ ovirt_vms.ovirt_vms }}"
+  loop: "{{ ovirt_vms.ovirt_vms | selectattr('name', 'in', ovirt_target_vms) | list }}"
   loop_control:
     loop_var: vm
 
