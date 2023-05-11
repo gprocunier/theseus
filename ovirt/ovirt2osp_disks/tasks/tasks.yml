@@ -1,18 +1,3 @@
-# - name: Download oVirt disk images
-#   ansible.builtin.command:
-#     cmd: >
-#       ovirt-imageio-client
-#       --ca-file="{{ ovirt_ca_file }}"
-#       --url=https://{{ ovirt_hostname }}/ovirt-engine/api/disks/{{ disk.id }}/imageio
-#       --username="{{ ovirt_username }}"
-#       --password="{{ ovirt_password }}"
-#       download
-#       /tmp/{{ disk.name }}.qcow2
-#   loop: "{{ ovirt_disks.ovirt_disks }}"
-#   loop_control:
-#     loop_var: disk
-#   when: "disk.vm.id == vm.id"
-
 - name: Create snapshot of VM disks
   ovirt.ovirt.ovirt_snapshot:
     hostname: "{{ ovirt_hostname }}"
@@ -23,7 +8,7 @@
     description: "Exporting snapshot for {{ vm.name }}"
     wait: yes
   register: snapshot_result
-  loop: "{{ ovirt_vms.ovirt_vms }}"
+  loop: "{{ ovirt_vms.ovirt_vms | selectattr('name', 'in', ovirt_target_vms) | list }}"
   loop_control:
     loop_var: vm
 

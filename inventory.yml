@@ -1,0 +1,24 @@
+all:
+  vars:
+
+    ovirt_hostname: ovirt.example.com
+    ovirt_username: admin@internal
+    ovirt_password: ovirt_password
+    ovirt_ca_file: /path/to/ca.pem
+
+    openstack_auth_url: 'http://openstack.example.com/identity/v3'
+    openstack_username: 'openstack_username'
+    openstack_password: 'openstack_password'
+    openstack_project_name: 'admin'
+    openstack_user_domain_name: 'Default'
+    openstack_project_domain_name: 'Default'
+
+
+    ovirt_remove_snapshot: true
+    glance_remove_snapshot: true
+    openstack_network_shared: true
+    
+    ovirt_target_vms:
+      - workload_name_a
+      - workload_name_b
+      - workload_name_c

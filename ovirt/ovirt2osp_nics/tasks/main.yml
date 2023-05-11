@@ -41,8 +41,14 @@
     binding_vnic_type: "normal"
     binding_profile:
       workload_name: "{{ vm.name }}"
-      nic_order: "{{ loop.index }}"
+      nic_order: "{{ nic_order }}"
   register: neutron_ports
-  loop: "{{ ovirt_vms }}"
+  with_nested:
+    - "{{ ovirt_vms.ovirt_vms | selectattr('name', 'in', ovirt_target_vms) | list }}"
+    - "{{ vm.nics }}"
   loop_control:
-    loop_var: vm
+    loop_var: nested_item
+    index_var: nic_order
+  vars:
+    vm: "{{ nested_item[0] }}"
+    nic: "{{ nested_item[1] }}"
