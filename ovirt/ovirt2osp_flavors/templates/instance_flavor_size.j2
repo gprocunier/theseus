@@ -1,0 +1,8 @@
+{% set guest_memory_mb = vm.memory / 1024 %}
+{% set num_cpus = vm.cpu.topology.sockets * vm.cpu.topology.cores * vm.cpu.topology.threads %}
+{% for instance_type in instance_types %}
+  {% if guest_memory_mb <= instance_type.memory and num_cpus <= instance_type.vcpu %}
+    {{ instance_type.name }}
+    {% break %}
+  {% endif %}
+{% endfor %}

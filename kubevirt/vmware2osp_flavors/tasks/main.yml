@@ -1,0 +1,50 @@
+---
+- name: Gather KubeVirt VMs
+  community.kubernetes.k8s_info:
+    api_version: kubevirt.io/v1
+    kind: VirtualMachine
+    namespace: "{{ kubevirt_namespace }}"
+  register: kubevirt_vms
+
+- name: Filter VMs based on target_vms
+  set_fact:
+    filtered_vms: "{{ kubevirt_vms.resources | selectattr('metadata.name', 'in', target_vms) | list }}"
+  when: target_vms | length > 0
+  register: target_vm_filter
+
+- name: Set filtered_vms to all VMs if target_vms is empty or undefined
+  set_fact:
+    filtered_vms: "{{ kubevirt_vms.resources }}"
+  when: not target_vm_filter.changed
+
+- name: Analyze VM hardware types and assign flavors
+  set_fact:
+    flavor_size: "{{ lookup('template', 'instance_flavor_size.j2') }}"
+  loop: "{{ filtered_vms }}"
+  loop_control:
+    loop_var: vm
+  register: flavor_sizes
+
+- name: Create OpenStack flavors from analysis
+  openstack.cloud.flavor:
+    name: "{{ item.flavor_size }}"
+    ram: "{{ (item.vm.spec.template.spec.domain.resources.requests.memory / (2**30)) | round(0, 'ceil') | int }}"
+    vcpus: "{{ item.vm.spec.template.spec.domain.cpu.cores }}"
+    state: present
+    auth:
+      auth_url: "{{ openstack_auth_url }}"
+      username: "{{ openstack_username }}"
+      password: "{{ openstack_password }}"
+      project_name: "{{ openstack_project_name }}"
+      user_domain_name: "{{ openstack_user_domain_name }}"
+      project_domain_name: "{{ openstack_project_domain_name }}"
+  loop: "{{ flavor_sizes.results }}"
+  loop_control:
+    loop_var: item
+
+- name: Debug output of VMs analyzed and matched flavor types
+  debug:
+    msg: "Number of VMs analyzed for {{ item.key }}: {{ flavor_sizes.results | selectattr('flavor_size', 'equalto', item.key) | list | count }}"
+  loop: "{{ instance_types }}"
+  loop_control:
+    loop_var: item

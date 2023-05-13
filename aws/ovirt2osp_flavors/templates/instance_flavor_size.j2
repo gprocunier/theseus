@@ -1,0 +1,8 @@
+{% for flavor in instance_types %}
+  {% set flavor_cpu = flavor.values()|map(attribute='vcpu')|first %}
+  {% set flavor_memory = flavor.values()|map(attribute='memory')|first %}
+  {% if vm.vcpu >= flavor_cpu and vm.memory_mb // 1024 >= flavor_memory %}
+    {{ flavor.keys()|first }}
+    {% break %}
+  {% endif %}
+{% endfor %}

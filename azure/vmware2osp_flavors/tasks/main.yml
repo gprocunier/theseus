@@ -1,0 +1,52 @@
+---
+- name: Gather Azure VMs
+  azure_rm_virtualmachine_info:
+    resource_group: "{{ azure_resource_group }}"
+    client_id: "{{ azure_client_id }}"
+    secret: "{{ azure_secret }}"
+    tenant: "{{ azure_tenant }}"
+    subscription_id: "{{ azure_subscription_id }}"
+  register: azure_vms
+
+- name: Filter VMs based on target_vms
+  set_fact:
+    filtered_vms: "{{ azure_vms.vms | selectattr('name', 'in', target_vms) | list }}"
+  when: target_vms | length > 0
+  register: target_vm_filter
+
+- name: Set filtered_vms to all VMs if target_vms is empty or undefined
+  set_fact:
+    filtered_vms: "{{ azure_vms.vms }}"
+  when: not target_vm_filter.changed
+
+- name: Analyze VM hardware types and assign flavors
+  set_fact:
+    flavor_size: "{{ lookup('template', 'instance_flavor_size.j2') }}"
+  loop: "{{ filtered_vms }}"
+  loop_control:
+    loop_var: vm
+  register: flavor_sizes
+
+- name: Create OpenStack flavors from analysis
+  openstack.cloud.flavor:
+    name: "{{ item.flavor_size }}"
+    ram: "{{ (item.vm.hardware_profile.vm_size | regex_search('\\d+_\\d+') | first).split('_')[1] }}"
+    vcpus: "{{ (item.vm.hardware_profile.vm_size | regex_search('\\d+_\\d+') | first).split('_')[0] }}"
+    state: present
+    auth:
+      auth_url: "{{ openstack_auth_url }}"
+      username: "{{ openstack_username }}"
+      password: "{{ openstack_password }}"
+      project_name: "{{ openstack_project_name }}"
+      user_domain_name: "{{ openstack_user_domain_name }}"
+      project_domain_name: "{{ openstack_project_domain_name }}"
+  loop: "{{ flavor_sizes.results }}"
+  loop_control:
+    loop_var: item
+
+- name: Debug output of VMs analyzed and matched flavor types
+  debug:
+    msg: "Number of VMs analyzed for {{ item.flavor_size }}: {{ flavor_sizes.results | selectattr('flavor_size', 'equalto', item.flavor_size) | list | count }}"
+  loop: "{{ instance_types }}"
+  loop_control:
+    loop_var: item

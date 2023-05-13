@@ -1,0 +1,7 @@
+{% for instance_type in instance_types %}
+  {% if vm.ProcessorCount <= instance_type.vcpu and
+        (vm.MemoryAssigned / (1024**2)) <= instance_type.memory %}
+    {{ instance_type.name }}
+    {% break %}
+  {% endif %}
+{% endfor %}
