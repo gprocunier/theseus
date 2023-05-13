@@ -1,0 +1,8 @@
+{% set vcpu = vm.spec.template.spec.domain.cpu.cores %}
+{% set memory = (vm.spec.template.spec.domain.resources.requests.memory / (2**30))|round(0, 'ceil')|int %}
+{% for key, value in instance_types.items() %}
+  {% if vcpu == value.vcpu and memory == value.memory %}
+    {{ key }}
+    {% break %}
+  {% endif %}
+{% endfor %}

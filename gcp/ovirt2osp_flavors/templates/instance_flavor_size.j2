@@ -1,0 +1,7 @@
+{% set gcp_instance_type = vm.properties.machine_type.split('/')[-1] %}
+{% set gcp_instance_type_parts = gcp_instance_type.split('-') %}
+{% set instance_family = gcp_instance_type_parts[0] %}
+{% set instance_series = gcp_instance_type_parts[1] %}
+{% set instance_size = gcp_instance_type_parts[2] if gcp_instance_type_parts | length > 2 else 'custom' %}
+
+gcp-{{ instance_family }}-{{ instance_series }}-{{ instance_size }}

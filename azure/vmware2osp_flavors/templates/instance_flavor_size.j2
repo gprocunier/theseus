@@ -1,0 +1,7 @@
+{% set vm_ram = (vm.hardware_profile.vm_size | regex_search('\\d+_\\d+') | first).split('_')[1]|int %}
+{% set vm_vcpu = (vm.hardware_profile.vm_size | regex_search('\\d+_\\d+') | first).split('_')[0]|int %}
+{% for instance_type in instance_types %}
+{% if vm_vcpu == instance_type.vcpu and vm_ram == instance_type.ram %}
+{{ instance_type.name }}
+{% endif %}
+{% endfor %}

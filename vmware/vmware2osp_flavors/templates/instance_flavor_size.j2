@@ -1,0 +1,7 @@
+{% for instance_type in instance_types %}
+  {% if vm.hw_processor_count <= instance_type.vcpu and
+        (vm.hw_memtotal_mb / 1024) <= instance_type.memory %}
+    {{ instance_type.name }}
+    {% break %}
+  {% endif %}
+{% endfor %}

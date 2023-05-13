@@ -18,7 +18,78 @@ all:
     glance_remove_snapshot: true
     openstack_network_shared: true
     
-    ovirt_target_vms:
+    # if undefined, all vms will be queried
+    target_vms:
       - workload_name_a
       - workload_name_b
       - workload_name_c
+
+
+# When using vmware2osp
+# ---
+# all:
+#   hosts:
+#     vmware_vcenter:
+#       ansible_host: vcenter.example.com
+#       ansible_user: 'your_vcenter_username'
+#       ansible_password: 'your_vcenter_password'
+#       ansible_connection: local
+#       validate_certs: no
+
+
+# When using hyperv2osp
+# ---
+# all:
+#   hosts:
+#     hyperv_host:
+#       ansible_host: 192.168.1.10
+#       ansible_user: Administrator
+#       ansible_password: YourSecurePassword
+#       ansible_connection: ansible.windows.winrm
+#       ansible_winrm_server_cert_validation: ignore
+
+
+# When using kubevirt2osp
+# ---
+# all:
+#   hosts:
+#     kubevirt:
+#       ansible_connection: local
+#   vars:
+#     kubeconfig: /path/to/your/kubeconfig
+
+# When using azure2osp
+# ---
+# all:
+#   hosts:
+#     localhost:
+#   vars:
+#     ansible_connection: local
+#     ansible_python_interpreter: "{{ ansible_playbook_python }}"
+#     azure_subscription_id: "your_subscription_id"
+#     azure_client_id: "your_client_id"
+#     azure_secret: "your_secret"
+#     azure_tenant: "your_tenant_id"
+
+# When using aws2osp
+# ---
+# all:
+#   hosts:
+#     localhost:
+#       ansible_connection: local
+#   vars:
+#     aws_access_key: "your_aws_access_key"
+#     aws_secret_key: "your_aws_secret_key"
+#     aws_region: "us-west-2"
+
+# When using gcp2osp
+# ---
+# all:
+#   hosts:
+#     localhost:
+#       ansible_connection: local
+#   vars:
+#     gcp_project: "your_gcp_project_id"
+#     gcp_auth_kind: "serviceaccount"
+#     gcp_service_account_file: "/path/to/your/service_account_file.json"
+#     gcp_region: "us-west1"
